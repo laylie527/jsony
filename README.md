@@ -1,10 +1,8 @@
 # JSONy - A loose, direct to object json parser and serializer with hooks.
 
-`nimble install jsony`
+![Tests](https://github.com/laylie527/jsony/workflows/tests/badge.svg)
 
-![Github Actions](https://github.com/treeform/jsony/workflows/Github%20Actions/badge.svg)
-
-[API reference](https://treeform.github.io/jsony)
+[API reference](https://laylie527.github.io/jsony)
 
 This library has no dependencies other than the Nim standard library.
 
