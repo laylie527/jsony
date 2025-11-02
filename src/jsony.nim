@@ -233,6 +233,7 @@ proc parseHook*(s: string, i: var int, v: var string) =
           copyMem(v[vLen].addr, s[copyStart].unsafeAddr, numBytes)
       copyStart = i
 
+  v = ""
   var copyStart = i
   while i < s.len:
     let c = s[i]
@@ -372,6 +373,8 @@ template snakeCase(s: string): string =
   const k = snakeCaseDynamic(s)
   k
 
+proc takeVar[T](v: var T) = discard
+
 proc parseObjectInner[T](s: string, i: var int, v: var T) =
   while i < s.len:
     eatSpace(s, i)
@@ -385,9 +388,13 @@ proc parseObjectInner[T](s: string, i: var int, v: var T) =
     block all:
       for k, v in v.fieldPairs:
         if k == key or snakeCase(k) == key:
-          var v2: type(v)
-          parseHook(s, i, v2)
-          v = v2
+          when compiles(takeVar(v)):
+            parseHook(s, i, v)
+          else:
+            # Nim passes discriminator as non-var
+            var v2 = v
+            parseHook(s, i, v2)
+            v = v2
           break all
       skipValue(s, i)
     eatSpace(s, i)

@@ -17,6 +17,17 @@ when NimMajor >= 2: # Default field values are only supported in Nim 2.0+
     # Make sure the default value is deserialized correctly.
     doAssert f.legs == 4
 
+  block:
+    type
+      Frog = object
+        leftLeg: Leg
+      Leg = object
+        length: int = 2
+
+    let s = """{"leftLeg":{}}"""
+    let f = s.fromJson(Frog)
+    doAssert f.leftLeg.length == 2
+
 block:
   type Foo2 = ref object
     field: string
