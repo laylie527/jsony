@@ -18,7 +18,7 @@ type
 proc parseHook*[T](s: string, i: var int, v: var seq[T])
 proc parseHook*[T: enum](s: string, i: var int, v: var T)
 proc parseHook*[T: object|ref object](s: string, i: var int, v: var T)
-proc parseHook*[K: string | enum, V](s: string, i: var int, v: var SomeTable[K, V])
+proc parseHook*[K, V](s: string, i: var int, v: var SomeTable[K, V])
 proc parseHook*[T](s: string, i: var int, v: var (SomeSet[T]|set[T]))
 proc parseHook*[T: tuple](s: string, i: var int, v: var T)
 proc parseHook*[T: array](s: string, i: var int, v: var T)
@@ -26,6 +26,21 @@ proc parseHook*[T: not object](s: string, i: var int, v: var ref T)
 proc parseHook*(s: string, i: var int, v: var JsonNode)
 proc parseHook*(s: string, i: var int, v: var char)
 proc parseHook*[T: distinct](s: string, i: var int, v: var T)
+
+proc toKeyHook*[T: string | enum](v: T): string =
+  $v
+
+proc toKeyHook*[T](v: T): string =
+  {.error: "no toKeyHook defined for type " & $T.}
+
+proc fromKeyHook*(k: string; v: var string) =
+  v = k
+
+proc fromKeyHook*[T: enum](k: string; v: var T) =
+  v = parseEnum[T](k)
+
+proc fromKeyHook*[T](k: string; v: var T) =
+  {.error: "no fromKeyHook defined for type " & $T.}
 
 template error(msg: string, i: int) =
   ## Shortcut to raise an exception.
@@ -495,7 +510,7 @@ proc parseHook*[T](s: string, i: var int, v: var Option[T]) =
   parseHook(s, i, e)
   v = some(e)
 
-proc parseHook*[K: string | enum, V](s: string, i: var int, v: var SomeTable[K, V]) =
+proc parseHook*[K, V](s: string, i: var int, v: var SomeTable[K, V]) =
   ## Parse an object.
   when compiles(new(v)):
     new(v)
@@ -504,8 +519,10 @@ proc parseHook*[K: string | enum, V](s: string, i: var int, v: var SomeTable[K, 
     eatSpace(s, i)
     if i < s.len and s[i] == '}':
       break
+    var keyStr = ""
+    parseHook(s, i, keyStr)
     var key: K
-    parseHook(s, i, key)
+    fromKeyHook(keyStr, key)
     eatChar(s, i, ':')
     var element: V
     parseHook(s, i, element)
@@ -812,7 +829,7 @@ proc dumpHook*(s: var string, v: object) =
     for k, e in v.pairs:
       if i > 0:
         s.add ','
-      s.dumpHook(k)
+      s.dumpHook(toKeyHook(k))
       s.add ':'
       s.dumpHook(e)
       inc i
