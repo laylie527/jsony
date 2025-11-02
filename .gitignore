@@ -10,3 +10,7 @@ nimcache
 *.pdb
 *.ilk
 .*
+
+/config.nims
+nimble.paths
+nimbledeps
