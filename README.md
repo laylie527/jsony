@@ -97,25 +97,6 @@ Hooks are a powerful concept that allows you to parse json "your way" and is the
 
 - Note: that hooks need to be exported to where you are parsing the json so that the parsing system can pick them up.
 
-### `proc newHook*()` Can be used to populate default values.
-
-Sometimes the absence of a field means it should have a default value. Normally this would just be Nim's default value for the variable type but that isn't always what you want. With the newHook() you can initialize the object's defaults before the main parsing happens.
-
-```nim
-type
-  Foo5 = object
-    visible: string
-    id: string
-proc newHook*(foo: var Foo5) =
-  # Populates the object before its fully deserialized.
-  foo.visible = "yes"
-
-var s = """{"id":"123"}"""
-var v = s.fromJson(Foo5)
-doAssert v.id == "123"
-doAssert v.visible == "yes"
-```
-
 ### `proc postHook*()` Can be used to run code after the object is fully parsed.
 
 Sometimes we need run some code after the object is created. For example to set other values based on values that were set but are not part of the json data. Maybe to sanitize the object or convert older versions to new versions. Here I need to retain the original size as I will be messing with the object's regular size:

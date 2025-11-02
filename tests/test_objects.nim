@@ -46,13 +46,9 @@ type
     visible: string
     name: string
   Foo4 = ref object
-    visible: string
+    visible: string = "yes"
     id: string
     bar: Bar4
-
-proc newHook(foo: var Foo4) =
-  foo = Foo4()
-  foo.visible = "yes"
 
 block:
   var s = """{"id":"123", "bar":{"name":"abc", "visible": "yes"}}"""
@@ -65,10 +61,8 @@ block:
 # Hooks can't be inside blocks.
 type
   Foo5 = object
-    visible: string
+    visible: string = "yes"
     id: string
-proc newHook(foo: var Foo5) =
-  foo.visible = "yes"
 
 block:
   var s = """{"id":"123", "visible": "yes"}"""

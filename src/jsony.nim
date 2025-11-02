@@ -446,9 +446,7 @@ proc parseHook*[T: object|ref object](s: string, i: var int, v: var T) =
     return
   eatChar(s, i, '{')
   when not v.isObjectVariant:
-    when compiles(newHook(v)):
-      newHook(v)
-    elif compiles(new(v)):
+    when compiles(new(v)):
       new(v)
   else:
     # Try looking for the discriminatorFieldName, then parse as normal object.
@@ -464,16 +462,12 @@ proc parseHook*[T: object|ref object](s: string, i: var int, v: var T) =
         var discriminator: type(v.discriminatorField)
         parseHook(s, i, discriminator)
         new(v, discriminator)
-        when compiles(newHook(v)):
-          newHook(v)
         break
       skipValue(s, i)
       if i < s.len and s[i] != '}':
         eatChar(s, i, ',')
       else:
-        when compiles(newHook(v)):
-          newHook(v)
-        elif compiles(new(v)):
+        when compiles(new(v)):
           new(v)
         break
     i = saveI
@@ -597,7 +591,6 @@ proc fromJson*[T](s: string, x: typedesc[T]): T =
   ## Takes json and outputs the object it represents.
   ## * Extra json fields are ignored.
   ## * Missing json fields keep their default values.
-  ## * `proc newHook(foo: var ...)` Can be used to populate default values.
   var i = 0
   result = default(T)
   s.parseHook(i, result)
