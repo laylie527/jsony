@@ -1,5 +1,7 @@
 import jsony, strutils
 
+const NimDefaultFieldLiteralFixed = (NimMajor, NimMinor, NimPatch) > (2, 2, 6)
+
 block:
   type Entry1 = object
     color: string
@@ -23,10 +25,14 @@ when NimMajor >= 2: # Default field values are only supported in Nim 2.0+
         leftLeg: Leg
       Leg = object
         length: int = 2
+        when NimDefaultFieldLiteralFixed:
+          digits = 5
 
     let s = """{"leftLeg":{}}"""
     let f = s.fromJson(Frog)
     doAssert f.leftLeg.length == 2
+    when NimDefaultFieldLiteralFixed:
+      doassert f.leftLeg.digits == 5
 
 block:
   type Foo2 = ref object
